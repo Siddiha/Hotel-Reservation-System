@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: Hotel Reservation API
+  version: 1.0.0
+  description: OpenAPI definition for the Hotel Reservation System.
+servers:
+  - url: https://api.example.com
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new guest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: Created
+  /api/auth/login:
+    post:
+      summary: Login (returns mock JWT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        "200":
+          description: OK
+  /api/rooms/available:
+    get:
+      summary: Search available rooms
+      responses:
+        "200":
+          description: OK
+  /api/reservations/book:
+    post:
+      summary: Book a room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationRequest"
+      responses:
+        "201":
+          description: Created
+  /api/reservations/cancel/{id}:
+    put:
+      summary: Cancel booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+  /api/reservations/my:
+    get:
+      summary: View my bookings
+      responses:
+        "200":
+          description: OK
+  /api/checkin/{reservationId}:
+    put:
+      summary: Check in a guest
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+  /api/checkout/{reservationId}:
+    put:
+      summary: Check out a guest
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+  /api/billing/{id}:
+    get:
+      summary: View invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    ReservationRequest:
+      type: object
+      properties:
+        roomId:
+          type: integer
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        guestId:
+          type: string
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        reservationId:
+          type: integer
+        guestId:
+          type: string
+        amount:
+          type: number
+          format: double
+        status:
+          type: string

@@ -1,0 +1,6 @@
+<throttlePolicy>
+  <name>DefaultPolicy</name>
+  <description>Rate limiting for hotel API</description>
+  <limit>1000</limit>
+  <unit>min</unit>
+</throttlePolicy>

@@ -1,0 +1,3 @@
+<sequence name="bookingSequence">
+  <description>Main mediation flow for booking requests.</description>
+</sequence>

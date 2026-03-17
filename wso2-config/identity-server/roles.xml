@@ -1,0 +1,5 @@
+<roles>
+  <role name="Guest" />
+  <role name="Staff" />
+  <role name="Manager" />
+</roles>

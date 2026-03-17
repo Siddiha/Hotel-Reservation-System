@@ -1,0 +1,3 @@
+<sequence name="notificationSequence">
+  <description>Triggers email/SMS notifications after bookings.</description>
+</sequence>

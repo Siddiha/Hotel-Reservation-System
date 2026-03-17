@@ -1,0 +1,4 @@
+com\hotel\reservation\repository\ReservationRepository.class
+com\hotel\reservation\controller\ReservationController.class
+com\hotel\reservation\model\Reservation.class
+com\hotel\reservation\ReservationServiceApplication.class

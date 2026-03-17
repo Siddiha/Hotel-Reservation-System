@@ -1,0 +1,6 @@
+<oauth2Config>
+  <tokenEndpoint>https://identity.example.com/oauth2/token</tokenEndpoint>
+  <authorizeEndpoint>https://identity.example.com/oauth2/authorize</authorizeEndpoint>
+  <clientId>hotel-client</clientId>
+  <clientSecret>CHANGE_ME</clientSecret>
+</oauth2Config>

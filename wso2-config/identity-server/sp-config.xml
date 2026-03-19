@@ -1,0 +1,69 @@
+<!--
+  WSO2 Identity Server 6.x — Service Provider configuration
+  ============================================================
+  HOW TO APPLY:
+    1. Open IS Management Console → https://localhost:9443/carbon
+    2. Login: admin / admin
+    3. Main → Identity → Service Providers → Add
+    4. Name: HotelReservationApp  → Register
+    5. Fill in each section below.
+
+  GRANT TYPES used:
+    - Resource Owner Password Credentials (ROPC) — for the login form
+      POST https://localhost:9443/oauth2/token
+      Body: grant_type=password&username=<user>&password=<pass>
+            &client_id=hotel-client&client_secret=hotel-secret
+
+    - Refresh Token — to renew expired access tokens
+-->
+
+<serviceProvider name="HotelReservationApp">
+
+  <!-- ── Section: Inbound Authentication ───────────────────────────────── -->
+  <!-- IS Console → Inbound Authentication Configuration → OAuth/OpenID Connect -->
+  <oauth2>
+    <clientId>hotel-client</clientId>
+    <clientSecret>hotel-secret</clientSecret>
+
+    <!-- Grant types to enable (tick all four in the UI) -->
+    <grantTypes>
+      <grantType>urn:ietf:params:oauth:grant-type:password</grantType>
+      <grantType>client_credentials</grantType>
+      <grantType>refresh_token</grantType>
+      <grantType>implicit</grantType>
+    </grantTypes>
+
+    <!-- Callback URL (only needed for Authorization Code / Implicit flows) -->
+    <callbackUrl>http://localhost:5173/callback</callbackUrl>
+
+    <!-- Token type: JWT so API Manager can validate without calling IS -->
+    <tokenType>JWT</tokenType>
+    <accessTokenExpiry>3600</accessTokenExpiry>    <!-- 1 hour  -->
+    <refreshTokenExpiry>86400</refreshTokenExpiry> <!-- 24 hours -->
+
+    <!-- Include user role in the JWT "groups" claim -->
+    <includeRolesClaim>true</includeRolesClaim>
+    <useUserRoleDomainInTokens>true</useUserRoleDomainInTokens>
+  </oauth2>
+
+  <!-- ── Section: Claim Configuration ─────────────────────────────────── -->
+  <!-- IS Console → Claim Configuration → Use Local Claim Dialect -->
+  <!--   Add: http://wso2.org/claims/role  → groups  (requested, mandatory) -->
+  <claims>
+    <localClaim uri="http://wso2.org/claims/username" jwtClaim="sub"      requested="true" mandatory="true" />
+    <localClaim uri="http://wso2.org/claims/role"     jwtClaim="groups"   requested="true" mandatory="false" />
+  </claims>
+
+  <!-- ── Section: Role / Permission ────────────────────────────────────── -->
+  <!--
+    IS Console → Main → Identity → Roles → Add Role
+    Create three roles matching roles.xml:
+      GUEST    → assign scope: hotel_guest
+      STAFF    → assign scope: hotel_staff
+      MANAGER  → assign scope: hotel_manager
+
+    Then assign users to roles:
+      Main → Identity → Users → <username> → Assign Roles
+  -->
+
+</serviceProvider>

@@ -1,23 +1,29 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { userApi } from '../api.js'
-import { useAuth } from '../context/AuthContext.jsx'
+import { userApi } from '../api'
 
 export default function Login() {
-  const [form, setForm] = useState({ username: '', password: '' })
-  const [error, setError] = useState('')
-  const { login } = useAuth()
+  const [form, setForm]     = useState({ username: '', password: '' })
+  const [error, setError]   = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
     try {
-      const res = await userApi.post('/api/auth/login', form)
-      login({ ...res.data, username: form.username })
+      const { data } = await userApi.post('/api/auth/login', form)
+      // Store token + user info from user-service response
+      localStorage.setItem('token',    data.token)
+      localStorage.setItem('role',     data.role)
+      localStorage.setItem('userId',   data.userId)
+      localStorage.setItem('username', form.username)
       navigate('/rooms')
-    } catch {
-      setError('Invalid username or password.')
+    } catch (err) {
+      setError(err.response?.status === 401 ? 'Invalid username or password.' : 'Login failed. Try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -26,7 +32,7 @@ export default function Login() {
       <div className="col-md-4">
         <div className="card shadow-sm">
           <div className="card-body p-4">
-            <h4 className="mb-4 text-center">Login</h4>
+            <h4 className="text-center mb-4">Hotel Login</h4>
             {error && <div className="alert alert-danger py-2">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -41,17 +47,19 @@ export default function Login() {
               <div className="mb-3">
                 <label className="form-label">Password</label>
                 <input
-                  className="form-control"
                   type="password"
+                  className="form-control"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
                   required
                 />
               </div>
-              <button className="btn btn-primary w-100 mt-2">Login</button>
+              <button className="btn btn-primary w-100" disabled={loading}>
+                {loading ? 'Signing in…' : 'Sign In'}
+              </button>
             </form>
-            <p className="mt-3 text-center text-muted small">
-              No account? <Link to="/register">Register here</Link>
+            <p className="text-center mt-3 mb-0 small">
+              No account? <Link to="/register">Register</Link>
             </p>
           </div>
         </div>

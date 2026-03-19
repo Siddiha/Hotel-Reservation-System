@@ -1,6 +1,31 @@
 <oauth2Config>
-  <tokenEndpoint>https://identity.example.com/oauth2/token</tokenEndpoint>
-  <authorizeEndpoint>https://identity.example.com/oauth2/authorize</authorizeEndpoint>
+  <!-- WSO2 Identity Server 6.x running on default port 9443 -->
+  <tokenEndpoint>https://localhost:9443/oauth2/token</tokenEndpoint>
+  <authorizeEndpoint>https://localhost:9443/oauth2/authorize</authorizeEndpoint>
+  <introspectEndpoint>https://localhost:9443/oauth2/introspect</introspectEndpoint>
+  <jwksEndpoint>https://localhost:9443/oauth2/jwks</jwksEndpoint>
+  <userinfoEndpoint>https://localhost:9443/oauth2/userinfo</userinfoEndpoint>
+
+  <!-- Service Provider registered in IS Management Console -->
   <clientId>hotel-client</clientId>
-  <clientSecret>CHANGE_ME</clientSecret>
+  <clientSecret>CHANGE_ME_AFTER_REGISTRATION</clientSecret>
+
+  <!-- Grant types enabled for this SP -->
+  <grantTypes>
+    <grantType>password</grantType>
+    <grantType>client_credentials</grantType>
+    <grantType>refresh_token</grantType>
+  </grantTypes>
+
+  <!-- Scopes mapped to roles -->
+  <scopes>
+    <scope name="hotel_guest"   roles="GUEST"   description="Guest booking access" />
+    <scope name="hotel_staff"   roles="STAFF"   description="Staff check-in/out access" />
+    <scope name="hotel_manager" roles="MANAGER" description="Manager reporting access" />
+  </scopes>
+
+  <!-- JWT token settings -->
+  <tokenType>JWT</tokenType>
+  <tokenExpiry>3600</tokenExpiry>   <!-- seconds -->
+  <refreshTokenExpiry>86400</refreshTokenExpiry>
 </oauth2Config>

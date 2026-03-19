@@ -1,0 +1,102 @@
+<!--
+  WSO2 API Manager 4.x — JWT Validation Configuration
+  =====================================================
+  API Manager validates the JWT issued by Identity Server using IS's JWKS.
+  No token introspection call is needed — validation is done locally.
+
+  HOW TO APPLY:
+    1. Open APIM Publisher → https://localhost:9443/publisher
+    2. Create API (or import hotel-api.yaml)
+    3. Under Develop → API Configurations → Runtime → Backend JWT → Enable
+    4. Under Portal → Subscriptions → add a subscription tier (Bronze/Silver/Gold)
+
+  Then in APIM's deployment.toml (WSO2AM_HOME/repository/conf/deployment.toml)
+  add the JWT validator section below so APIM trusts IS-issued tokens.
+-->
+
+<!--
+  ── deployment.toml snippet (paste into WSO2AM_HOME/repository/conf/deployment.toml) ──
+
+  [apim.jwt]
+  enable = true
+  encoding = "base64"                    # JWT encoding
+  generator_impl = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator"
+  claim_dialect = "http://wso2.org/claims"
+  header = "X-JWT-Assertion"
+  signing_algorithm = "SHA256withRSA"
+  enable_user_claims = true
+
+  # Tell APIM where to fetch IS public keys to verify JWT signatures
+  [[apim.key_manager]]
+  name = "WSO2IdentityServer"
+  type = "WSO2-IS"
+  display_name = "WSO2 Identity Server"
+  url = "https://localhost:9443/services/"
+  server_url = "https://localhost:9443/services/"
+  introspection_endpoint = "https://localhost:9443/oauth2/introspect"
+  client_registration_endpoint = "https://localhost:9443/api/identity/oauth2/dcr/v1.1/register"
+  token_endpoint = "https://localhost:9443/oauth2/token"
+  revoke_endpoint = "https://localhost:9443/oauth2/revoke"
+  username = "admin"
+  password = "admin"
+  [apim.key_manager.configuration]
+    PublisherAPIs = true
+    DevPortalAPIs = true
+
+  # CORS — allow frontend (Vite dev server) to call APIM
+  [apim.cors]
+  allow_origins = ["http://localhost:5173"]
+  allow_methods = ["GET","PUT","POST","DELETE","OPTIONS"]
+  allow_headers = ["authorization","Access-Control-Allow-Origin","Content-Type","X-Guest-Id"]
+  allow_credentials = false
+-->
+
+<!--
+  ── How the full login flow works ──────────────────────────────────────────
+
+  Step 1  — User submits login form on frontend (http://localhost:5173)
+
+  Step 2  — Frontend calls IS token endpoint (Resource Owner Password grant):
+            POST https://localhost:9443/oauth2/token
+            Content-Type: application/x-www-form-urlencoded
+            Body:
+              grant_type=password
+              &username=john
+              &password=secret
+              &client_id=hotel-client
+              &client_secret=hotel-secret
+              &scope=hotel_guest
+
+  Step 3  — IS returns a signed JWT access_token:
+            {
+              "access_token": "eyJ...",
+              "token_type":   "Bearer",
+              "expires_in":   3600,
+              "scope":        "hotel_guest"
+            }
+
+  Step 4  — Frontend stores access_token in localStorage.
+
+  Step 5  — Frontend calls APIM gateway for protected resources:
+            GET https://localhost:8243/hotel/v1/rooms/available
+            Authorization: Bearer eyJ...
+
+  Step 6  — APIM validates JWT signature using IS JWKS
+            (https://localhost:9443/oauth2/jwks) — no extra IS call needed.
+
+  Step 7  — APIM forwards request to backend microservice (e.g. room-service:8083).
+-->
+
+<!--
+  ── API import steps in APIM Publisher ─────────────────────────────────────
+  1. Login https://localhost:9443/publisher  (admin/admin)
+  2. APIs → Import API → OpenAPI File → select hotel-api.yaml
+  3. Name: HotelAPI  Version: 1.0  Context: /hotel/v1
+  4. Under Endpoint → HTTP/REST Endpoint:
+       Production: http://localhost:8081  (user-service — for /auth/* routes)
+       Note: per-resource endpoints are set via x-wso2-backend-url in the YAML
+  5. Deploy to Default Gateway
+  6. Publish the API
+  7. In Developer Portal subscribe with an Application using Bronze tier
+  8. Generate consumer key/secret for that application
+-->

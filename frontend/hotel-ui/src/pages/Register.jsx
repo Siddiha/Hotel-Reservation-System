@@ -1,22 +1,24 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { userApi } from '../api.js'
+import { userApi } from '../api'
 
 export default function Register() {
-  const [form, setForm] = useState({ username: '', password: '' })
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
+  const [form, setForm]     = useState({ username: '', password: '' })
+  const [error, setError]   = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
     try {
       await userApi.post('/api/auth/register', form)
-      setSuccess(true)
-      setTimeout(() => navigate('/login'), 1500)
-    } catch {
+      navigate('/login')
+    } catch (err) {
       setError('Registration failed. Username may already exist.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -25,8 +27,7 @@ export default function Register() {
       <div className="col-md-4">
         <div className="card shadow-sm">
           <div className="card-body p-4">
-            <h4 className="mb-4 text-center">Create Account</h4>
-            {success && <div className="alert alert-success py-2">Registered! Redirecting to login...</div>}
+            <h4 className="text-center mb-4">Create Account</h4>
             {error && <div className="alert alert-danger py-2">{error}</div>}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -41,17 +42,19 @@ export default function Register() {
               <div className="mb-3">
                 <label className="form-label">Password</label>
                 <input
-                  className="form-control"
                   type="password"
+                  className="form-control"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
                   required
                 />
               </div>
-              <button className="btn btn-success w-100 mt-2">Register</button>
+              <button className="btn btn-success w-100" disabled={loading}>
+                {loading ? 'Registering…' : 'Register'}
+              </button>
             </form>
-            <p className="mt-3 text-center text-muted small">
-              Already have an account? <Link to="/login">Login</Link>
+            <p className="text-center mt-3 mb-0 small">
+              Already have an account? <Link to="/login">Sign In</Link>
             </p>
           </div>
         </div>

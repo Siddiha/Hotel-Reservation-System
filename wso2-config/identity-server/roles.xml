@@ -1,5 +1,39 @@
 <roles>
-  <role name="Guest" />
-  <role name="Staff" />
-  <role name="Manager" />
+  <!--
+    Roles to create in WSO2 Identity Server 6.x Management Console.
+    Path: IS Console → User Management → Roles → Add Role
+  -->
+
+  <role name="GUEST">
+    <description>Regular hotel guest — can browse rooms, book, cancel, view own reservations</description>
+    <permissions>
+      <permission>/api/rooms/available</permission>
+      <permission>/api/reservations/book</permission>
+      <permission>/api/reservations/cancel/{id}</permission>
+      <permission>/api/reservations/my</permission>
+    </permissions>
+    <throttleTier>Bronze</throttleTier>  <!-- 100 req/min -->
+  </role>
+
+  <role name="STAFF">
+    <description>Hotel receptionist — can check guests in/out and assign housekeeping tasks</description>
+    <permissions>
+      <permission>/api/rooms/available</permission>
+      <permission>/api/reservations/my</permission>
+      <permission>/api/reservations/checkin/{id}</permission>
+      <permission>/api/reservations/checkout/{id}</permission>
+      <permission>/api/housekeeping/task</permission>
+      <permission>/api/billing/{id}</permission>
+    </permissions>
+    <throttleTier>Silver</throttleTier>  <!-- 500 req/min -->
+  </role>
+
+  <role name="MANAGER">
+    <description>Hotel manager — full access including reports and revenue analytics</description>
+    <permissions>
+      <permission>/**</permission>  <!-- all endpoints -->
+    </permissions>
+    <throttleTier>Gold</throttleTier>  <!-- 1000 req/min -->
+  </role>
+
 </roles>

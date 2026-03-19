@@ -1,6 +1,43 @@
-<throttlePolicy>
-  <name>DefaultPolicy</name>
-  <description>Rate limiting for hotel API</description>
-  <limit>1000</limit>
-  <unit>min</unit>
-</throttlePolicy>
+<throttlePolicies>
+
+  <!--
+    Bronze tier — default for GUEST role.
+    Low request limit suitable for regular hotel guests browsing and booking.
+  -->
+  <throttlePolicy name="Bronze" tier="GUEST">
+    <description>Default rate limit for guest users</description>
+    <limit>100</limit>
+    <unit>min</unit>
+  </throttlePolicy>
+
+  <!--
+    Silver tier — for STAFF role.
+    Higher limit for hotel staff managing check-ins, check-outs, and reservations.
+  -->
+  <throttlePolicy name="Silver" tier="STAFF">
+    <description>Rate limit for hotel staff</description>
+    <limit>500</limit>
+    <unit>min</unit>
+  </throttlePolicy>
+
+  <!--
+    Gold tier — for MANAGER role.
+    Highest limit for managers overseeing all operations and generating reports.
+  -->
+  <throttlePolicy name="Gold" tier="MANAGER">
+    <description>Rate limit for hotel managers</description>
+    <limit>1000</limit>
+    <unit>min</unit>
+  </throttlePolicy>
+
+  <!--
+    Unlimited tier — for internal/system-to-system calls (e.g., WSO2 EI → microservices).
+    Should NOT be assigned to end users.
+  -->
+  <throttlePolicy name="Unlimited" tier="SYSTEM">
+    <description>No rate limit for internal system calls</description>
+    <limit>-1</limit>
+    <unit>min</unit>
+  </throttlePolicy>
+
+</throttlePolicies>

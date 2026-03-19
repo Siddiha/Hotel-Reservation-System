@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { roomApi, reservationApi } from '../api.js'
-import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Rooms() {
   const [rooms, setRooms] = useState([])
   const [dates, setDates] = useState({ checkIn: '', checkOut: '' })
   const [message, setMessage] = useState({ text: '', type: '' })
-  const { user } = useAuth()
   const navigate = useNavigate()
+
+  const guestId = localStorage.getItem('userId') || ''
 
   useEffect(() => {
     roomApi.get('/api/rooms/available').then(res => setRooms(res.data))
@@ -20,7 +20,7 @@ export default function Rooms() {
       await reservationApi.post(
         '/api/reservations/book',
         { roomId, checkIn: dates.checkIn, checkOut: dates.checkOut },
-        { headers: { 'X-Guest-Id': user.userId } }
+        { headers: { 'X-Guest-Id': guestId } }
       )
       setMessage({ text: 'Room booked successfully!', type: 'success' })
       setTimeout(() => navigate('/reservations'), 1500)
@@ -30,6 +30,7 @@ export default function Rooms() {
   }
 
   const today = new Date().toISOString().split('T')[0]
+  const canBook = dates.checkIn && dates.checkOut
 
   return (
     <div>
@@ -37,7 +38,6 @@ export default function Rooms() {
 
       <div className="card mb-4 bg-light border-0">
         <div className="card-body">
-          <h6 className="mb-3">Select your dates to book</h6>
           <div className="row g-3">
             <div className="col-md-3">
               <label className="form-label">Check-in</label>
@@ -74,16 +74,20 @@ export default function Rooms() {
               <div className="card-body d-flex flex-column">
                 <h5 className="card-title">{room.type} Room</h5>
                 <p className="card-text text-muted flex-grow-1">{room.description}</p>
-                <p className="fw-bold fs-5 mb-3">${room.price} <span className="text-muted fw-normal fs-6">/ night</span></p>
+                <p className="fw-bold fs-5 mb-3">
+                  ${room.price} <span className="text-muted fw-normal fs-6">/ night</span>
+                </p>
                 <button
                   className="btn btn-primary"
                   onClick={() => handleBook(room.id)}
-                  disabled={!dates.checkIn || !dates.checkOut}
+                  disabled={!canBook}
                 >
                   Book Now
                 </button>
-                {(!dates.checkIn || !dates.checkOut) && (
-                  <small className="text-muted mt-2 text-center">Select dates above to book</small>
+                {!canBook && (
+                  <small className="text-muted mt-2 text-center">
+                    Select check-in and check-out dates above
+                  </small>
                 )}
               </div>
             </div>

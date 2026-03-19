@@ -2,135 +2,120 @@ openapi: 3.0.3
 info:
   title: Hotel Reservation API
   version: 1.0.0
-  description: OpenAPI definition for the Hotel Reservation System.
+  description: >
+    OpenAPI definition for the Hotel Reservation System.
+    Exposed through WSO2 API Manager. Backend microservices run on
+    ports 8081 (user), 8082 (reservation), 8083 (room), 8084 (billing).
+
 servers:
-  - url: https://api.example.com
-paths:
-  /api/auth/register:
-    post:
-      summary: Register a new guest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserRegistration"
-      responses:
-        "201":
-          description: Created
-  /api/auth/login:
-    post:
-      summary: Login (returns mock JWT)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserLogin"
-      responses:
-        "200":
-          description: OK
-  /api/rooms/available:
-    get:
-      summary: Search available rooms
-      responses:
-        "200":
-          description: OK
-  /api/reservations/book:
-    post:
-      summary: Book a room
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReservationRequest"
-      responses:
-        "201":
-          description: Created
-  /api/reservations/cancel/{id}:
-    put:
-      summary: Cancel booking
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-  /api/reservations/my:
-    get:
-      summary: View my bookings
-      responses:
-        "200":
-          description: OK
-  /api/checkin/{reservationId}:
-    put:
-      summary: Check in a guest
-      parameters:
-        - name: reservationId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-  /api/checkout/{reservationId}:
-    put:
-      summary: Check out a guest
-      parameters:
-        - name: reservationId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-  /api/billing/{id}:
-    get:
-      summary: View invoice
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
+  - url: https://localhost:8243/hotel/v1
+    description: WSO2 API Manager gateway (production)
+  - url: http://localhost:8243/hotel/v1
+    description: WSO2 API Manager gateway (sandbox)
+
+# ---------------------------------------------------------------------------
+# Security schemes
+# ---------------------------------------------------------------------------
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token issued by WSO2 Identity Server (OAuth2 client-credentials / password grant)
+
   schemas:
     UserRegistration:
       type: object
+      required: [username, password]
       properties:
         username:
           type: string
+          example: john_doe
         password:
           type: string
+          format: password
+          example: secret123
+
     UserLogin:
       type: object
+      required: [username, password]
       properties:
         username:
           type: string
+          example: john_doe
         password:
           type: string
+          format: password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: mock-jwt-token-for-john_doe
+        role:
+          type: string
+          example: GUEST
+        userId:
+          type: string
+          example: "1"
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          example: Suite
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+          example: 220.0
+        available:
+          type: boolean
+
     ReservationRequest:
       type: object
+      required: [roomId]
       properties:
         roomId:
           type: integer
+          example: 2
+        checkIn:
+          type: string
+          format: date
+          example: "2026-04-01"
+        checkOut:
+          type: string
+          format: date
+          example: "2026-04-05"
+        guestId:
+          type: string
+          example: "1"
+
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        guestId:
+          type: string
         checkIn:
           type: string
           format: date
         checkOut:
           type: string
           format: date
-        guestId:
+        status:
           type: string
+          enum: [BOOKED, CHECKED_IN, CHECKED_OUT, CANCELLED]
+
     Invoice:
       type: object
       properties:
@@ -145,3 +130,258 @@ components:
           format: double
         status:
           type: string
+          enum: [PENDING, PAID, CANCELLED]
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+# ---------------------------------------------------------------------------
+# Default security — all endpoints require JWT except register/login
+# ---------------------------------------------------------------------------
+security:
+  - BearerAuth: []
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+
+  # --- Auth (user-service: 8081) -------------------------------------------
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new guest
+      security: []          # public endpoint — no token required
+      x-wso2-backend-url: http://localhost:8081/api/auth/register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserRegistration"
+        "400":
+          description: Invalid input
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login and receive a JWT token
+      security: []          # public endpoint — no token required
+      x-wso2-backend-url: http://localhost:8081/api/auth/login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  # --- Rooms (room-service: 8083) ------------------------------------------
+
+  /rooms/available:
+    get:
+      tags: [Rooms]
+      summary: List all available rooms
+      x-wso2-backend-url: http://localhost:8083/api/rooms/available
+      responses:
+        "200":
+          description: List of available rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+        "401":
+          description: Unauthorized
+
+  # --- Reservations (reservation-service: 8082) ----------------------------
+
+  /reservations/book:
+    post:
+      tags: [Reservations]
+      summary: Book a room
+      x-wso2-backend-url: http://localhost:8082/api/reservations/book
+      parameters:
+        - name: X-Guest-Id
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Guest user ID (injected from JWT sub by API Manager in production)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservationRequest"
+      responses:
+        "201":
+          description: Reservation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "401":
+          description: Unauthorized
+
+  /reservations/my:
+    get:
+      tags: [Reservations]
+      summary: Get all reservations for the logged-in guest
+      x-wso2-backend-url: http://localhost:8082/api/reservations/my
+      parameters:
+        - name: X-Guest-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reservation"
+        "400":
+          description: Missing guest ID header
+        "401":
+          description: Unauthorized
+
+  /reservations/cancel/{id}:
+    put:
+      tags: [Reservations]
+      summary: Cancel a reservation
+      x-wso2-backend-url: http://localhost:8082/api/reservations/cancel/{id}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: X-Guest-Id
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reservation cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "403":
+          description: Forbidden — reservation belongs to a different guest
+        "404":
+          description: Reservation not found
+
+  /reservations/checkin/{id}:
+    put:
+      tags: [Reservations]
+      summary: Check in a guest (Staff/Manager only)
+      x-wso2-backend-url: http://localhost:8082/api/reservations/checkin/{id}
+      x-wso2-allowed-roles: Staff, Manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Guest checked in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Reservation not found
+
+  /reservations/checkout/{id}:
+    put:
+      tags: [Reservations]
+      summary: Check out a guest (Staff/Manager only)
+      x-wso2-backend-url: http://localhost:8082/api/reservations/checkout/{id}
+      x-wso2-allowed-roles: Staff, Manager
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Guest checked out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+        "404":
+          description: Reservation not found
+
+  # --- Billing (billing-service: 8084) -------------------------------------
+
+  /billing/{id}:
+    get:
+      tags: [Billing]
+      summary: Get invoice by reservation ID
+      x-wso2-backend-url: http://localhost:8084/api/billing/{id}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Invoice details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "404":
+          description: Invoice not found
+
+  /billing/generate:
+    post:
+      tags: [Billing]
+      summary: Generate an invoice for a reservation (Staff/Manager only)
+      x-wso2-backend-url: http://localhost:8084/api/billing/generate
+      x-wso2-allowed-roles: Staff, Manager
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Invoice"
+      responses:
+        "201":
+          description: Invoice generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "401":
+          description: Unauthorized

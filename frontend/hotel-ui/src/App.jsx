@@ -104,6 +104,153 @@ function NavLink({ to, children, current }) {
   )
 }
 
+function Footer() {
+  const location = useLocation()
+  const isAuth = location.pathname === '/login' || location.pathname === '/register'
+  if (isAuth) return null
+
+  return (
+    <footer style={{
+      background: 'linear-gradient(135deg, #060e1a 0%, #0A1628 100%)',
+      borderTop: '1px solid rgba(201,168,76,0.2)',
+      padding: '60px 60px 30px',
+      marginTop: 'auto'
+    }}>
+      {/* Top divider line */}
+      <div style={{
+        width: '60px', height: '2px',
+        background: 'linear-gradient(90deg, #C9A84C, #E8C96A)',
+        marginBottom: '48px'
+      }} />
+
+      {/* Footer grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1fr',
+        gap: '40px',
+        marginBottom: '48px'
+      }}>
+
+        {/* Brand column */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <span style={{ color: '#C9A84C', fontSize: '20px' }}>✦</span>
+            <span style={{
+              fontFamily: "'Playfair Display', serif",
+              color: '#fff', fontSize: '20px', fontWeight: '600', letterSpacing: '1px'
+            }}>The Grand Hotel</span>
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', lineHeight: 1.8, maxWidth: '260px', margin: '0 0 24px' }}>
+            Experience unparalleled luxury and comfort. Where every stay becomes an unforgettable memory in the heart of the city.
+          </p>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {['f', 'in', 'tw', 'ig'].map(s => (
+              <div key={s} style={{
+                width: '36px', height: '36px',
+                border: '1px solid rgba(201,168,76,0.3)',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'rgba(201,168,76,0.7)',
+                fontSize: '11px', fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#C9A84C'; e.currentTarget.style.background = 'rgba(201,168,76,0.1)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'; e.currentTarget.style.color = 'rgba(201,168,76,0.7)'; e.currentTarget.style.background = 'transparent' }}
+              >{s}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div>
+          <h4 style={{
+            color: '#C9A84C', fontSize: '11px', fontWeight: '600',
+            letterSpacing: '2px', textTransform: 'uppercase',
+            marginBottom: '20px', fontFamily: "'Inter', sans-serif"
+          }}>Quick Links</h4>
+          {[
+            { label: 'Browse Rooms', to: '/rooms' },
+            { label: 'My Reservations', to: '/reservations' },
+            { label: 'Sign In', to: '/login' },
+            { label: 'Register', to: '/register' },
+          ].map(({ label, to }) => (
+            <div key={label} style={{ marginBottom: '12px' }}>
+              <Link to={to} style={{
+                color: 'rgba(255,255,255,0.5)', fontSize: '14px',
+                textDecoration: 'none', transition: 'color 0.2s'
+              }}
+                onMouseEnter={e => e.target.style.color = '#C9A84C'}
+                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.5)'}
+              >→ {label}</Link>
+            </div>
+          ))}
+        </div>
+
+        {/* Amenities */}
+        <div>
+          <h4 style={{
+            color: '#C9A84C', fontSize: '11px', fontWeight: '600',
+            letterSpacing: '2px', textTransform: 'uppercase',
+            marginBottom: '20px', fontFamily: "'Inter', sans-serif"
+          }}>Amenities</h4>
+          {['Free Wi-Fi', 'Swimming Pool', 'Spa & Wellness', 'Fine Dining', 'Concierge', '24/7 Room Service'].map(a => (
+            <div key={a} style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '12px' }}>
+              ✓ {a}
+            </div>
+          ))}
+        </div>
+
+        {/* Contact */}
+        <div>
+          <h4 style={{
+            color: '#C9A84C', fontSize: '11px', fontWeight: '600',
+            letterSpacing: '2px', textTransform: 'uppercase',
+            marginBottom: '20px', fontFamily: "'Inter', sans-serif"
+          }}>Contact Us</h4>
+          {[
+            { icon: '📍', text: '123 Luxury Avenue\nCity Center, 00100' },
+            { icon: '📞', text: '+1 (800) 123-4567' },
+            { icon: '✉️', text: 'concierge@grandhotel.com' },
+            { icon: '🕐', text: 'Check-in: 3:00 PM\nCheck-out: 11:00 AM' },
+          ].map(({ icon, text }) => (
+            <div key={text} style={{ display: 'flex', gap: '10px', marginBottom: '16px', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '14px', marginTop: '1px' }}>{icon}</span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,0.07)',
+        paddingTop: '24px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', margin: 0 }}>
+          © 2025 The Grand Hotel. All rights reserved. Built with WSO2 API Manager & Identity Server.
+        </p>
+        <div style={{ display: 'flex', gap: '24px' }}>
+          {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(t => (
+            <span key={t} style={{
+              color: 'rgba(255,255,255,0.3)', fontSize: '12px', cursor: 'pointer', transition: 'color 0.2s'
+            }}
+              onMouseEnter={e => e.target.style.color = '#C9A84C'}
+              onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.3)'}
+            >{t}</span>
+          ))}
+        </div>
+      </div>
+    </footer>
+  )
+}
+
 function PrivateRoute({ children }) {
   return localStorage.getItem('token') ? children : <Navigate to="/login" replace />
 }
@@ -111,15 +258,20 @@ function PrivateRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/login"        element={<Login />} />
-        <Route path="/register"     element={<Register />} />
-        <Route path="/rooms"        element={<PrivateRoute><Rooms /></PrivateRoute>} />
-        <Route path="/reservations" element={<PrivateRoute><Reservations /></PrivateRoute>} />
-        <Route path="/invoice/:id"  element={<PrivateRoute><Invoice /></PrivateRoute>} />
-        <Route path="/"             element={<Navigate to="/rooms" replace />} />
-      </Routes>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Navbar />
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/login"        element={<Login />} />
+            <Route path="/register"     element={<Register />} />
+            <Route path="/rooms"        element={<PrivateRoute><Rooms /></PrivateRoute>} />
+            <Route path="/reservations" element={<PrivateRoute><Reservations /></PrivateRoute>} />
+            <Route path="/invoice/:id"  element={<PrivateRoute><Invoice /></PrivateRoute>} />
+            <Route path="/"             element={<Navigate to="/rooms" replace />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </BrowserRouter>
   )
 }

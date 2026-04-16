@@ -1,4 +1,4 @@
-# 🏨 The Grand Hotel — Reservation System
+# The Grand Hotel — Reservation System
 
 A full-stack microservices-based hotel reservation system integrated with **WSO2 API Manager** and **WSO2 Identity Server** for enterprise-grade authentication, API gateway, and security.
 

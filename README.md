@@ -4,7 +4,7 @@ A full-stack microservices-based hotel reservation system integrated with **WSO2
 
 ---
 
-## 📐 Architecture Overview
+## Architecture Overview
 
 ```text
 Frontend (React + Vite)  →  WSO2 API Manager (Gateway)  →  Microservices
@@ -268,6 +268,6 @@ Hotel-Reservation-System/
 
 ---
 
-## 👤 Author
+## 👤 Author : Sidd
 
 Built with WSO2 API Manager, Identity Server, Spring Boot, Ballerina, and React.

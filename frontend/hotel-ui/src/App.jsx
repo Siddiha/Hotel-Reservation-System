@@ -1,20 +1,19 @@
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
+import { useAuthContext } from '@asgardeo/auth-react'
 import Rooms        from './pages/Rooms.jsx'
 import Reservations from './pages/Reservations.jsx'
 import Invoice      from './pages/Invoice.jsx'
 import Login        from './pages/Login.jsx'
 import Register     from './pages/Register.jsx'
+import Callback     from './pages/Callback.jsx'
 
 function Navbar() {
-  const navigate  = useNavigate()
   const location  = useLocation()
-  const username  = localStorage.getItem('username')
-  const role      = localStorage.getItem('role')
+  const { state, signOut } = useAuthContext()
+  const username  = state.username || state.displayName || 'User'
+  const role      = state.roles?.[0] || 'Guest'
 
-  const logout = () => {
-    ;['token', 'role', 'userId', 'username'].forEach(k => localStorage.removeItem(k))
-    navigate('/login')
-  }
+  const logout = () => signOut()
 
   const isAuth = location.pathname === '/login' || location.pathname === '/register'
   if (isAuth) return null
@@ -45,7 +44,7 @@ function Navbar() {
       </Link>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {username ? (
+        {state.isAuthenticated ? (
           <>
             <NavLink to="/rooms" current={location.pathname}>Rooms</NavLink>
             <NavLink to="/reservations" current={location.pathname}>My Reservations</NavLink>
@@ -252,7 +251,8 @@ function Footer() {
 }
 
 function PrivateRoute({ children }) {
-  return localStorage.getItem('token') ? children : <Navigate to="/login" replace />
+  const { state } = useAuthContext()
+  return state.isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
 export default function App() {
@@ -264,6 +264,7 @@ export default function App() {
           <Routes>
             <Route path="/login"        element={<Login />} />
             <Route path="/register"     element={<Register />} />
+            <Route path="/callback"     element={<Callback />} />
             <Route path="/rooms"        element={<PrivateRoute><Rooms /></PrivateRoute>} />
             <Route path="/reservations" element={<PrivateRoute><Reservations /></PrivateRoute>} />
             <Route path="/invoice/:id"  element={<PrivateRoute><Invoice /></PrivateRoute>} />

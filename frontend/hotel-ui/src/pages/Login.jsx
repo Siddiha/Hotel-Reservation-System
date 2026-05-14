@@ -1,29 +1,14 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { userApi } from '../api'
+import { Link } from 'react-router-dom'
+import { useAuthContext } from '@asgardeo/auth-react'
 
 export default function Login() {
-  const [form, setForm]       = useState({ username: '', password: '' })
-  const [error, setError]     = useState('')
+  const { signIn } = useAuthContext()
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+  const handleSignIn = async () => {
     setLoading(true)
-    try {
-      const { data } = await userApi.post('/api/auth/login', form)
-      localStorage.setItem('token',    data.token)
-      localStorage.setItem('role',     data.role)
-      localStorage.setItem('userId',   String(data.userId))
-      localStorage.setItem('username', form.username)
-      navigate('/rooms')
-    } catch (err) {
-      setError(err.response?.status === 401 ? 'Invalid username or password.' : 'Login failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    await signIn()
   }
 
   return (
@@ -96,45 +81,9 @@ export default function Login() {
           Sign in to manage your reservations
         </p>
 
-        {error && (
-          <div style={{
-            background: '#fff0f0', border: '1px solid #ffcccc',
-            borderLeft: '4px solid #e74c3c',
-            borderRadius: '8px', padding: '12px 16px',
-            color: '#c0392b', fontSize: '14px', marginBottom: '20px'
-          }}>{error}</div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#0A1628', marginBottom: '8px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              Username
-            </label>
-            <input
-              style={inputStyle}
-              value={form.username}
-              onChange={e => setForm({ ...form, username: e.target.value })}
-              placeholder="Enter your username"
-              required
-            />
-          </div>
-          <div style={{ marginBottom: '28px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#0A1628', marginBottom: '8px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              Password
-            </label>
-            <input
-              type="password"
-              style={inputStyle}
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          <button type="submit" disabled={loading} style={btnStyle(loading)}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+        <button onClick={handleSignIn} disabled={loading} style={btnStyle(loading)}>
+          {loading ? 'Redirecting...' : 'Sign In with Asgardeo'}
+        </button>
 
         <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: '#7a8599' }}>
           No account?{' '}
@@ -145,15 +94,6 @@ export default function Login() {
       </div>
     </div>
   )
-}
-
-const inputStyle = {
-  width: '100%', padding: '13px 16px',
-  border: '1.5px solid #e0dbd0',
-  borderRadius: '8px', fontSize: '15px',
-  background: '#fff', color: '#0A1628',
-  outline: 'none', transition: 'border-color 0.2s',
-  fontFamily: "'Inter', sans-serif"
 }
 
 const btnStyle = (loading) => ({

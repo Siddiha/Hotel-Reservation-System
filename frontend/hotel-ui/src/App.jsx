@@ -3,6 +3,7 @@ import { useAuthContext } from '@asgardeo/auth-react'
 import Rooms        from './pages/Rooms.jsx'
 import Reservations from './pages/Reservations.jsx'
 import Invoice      from './pages/Invoice.jsx'
+import Profile      from './pages/Profile.jsx'
 import Login        from './pages/Login.jsx'
 import Register     from './pages/Register.jsx'
 import Callback     from './pages/Callback.jsx'
@@ -48,6 +49,7 @@ function Navbar() {
           <>
             <NavLink to="/rooms" current={location.pathname}>Rooms</NavLink>
             <NavLink to="/reservations" current={location.pathname}>My Reservations</NavLink>
+            <NavLink to="/profile" current={location.pathname}>Profile</NavLink>
             <div style={{
               margin: '0 12px',
               padding: '6px 14px',
@@ -172,6 +174,7 @@ function Footer() {
           {[
             { label: 'Browse Rooms', to: '/rooms' },
             { label: 'My Reservations', to: '/reservations' },
+            { label: 'My Profile', to: '/profile' },
             { label: 'Sign In', to: '/login' },
             { label: 'Register', to: '/register' },
           ].map(({ label, to }) => (
@@ -268,6 +271,7 @@ export default function App() {
             <Route path="/rooms"        element={<PrivateRoute><Rooms /></PrivateRoute>} />
             <Route path="/reservations" element={<PrivateRoute><Reservations /></PrivateRoute>} />
             <Route path="/invoice/:id"  element={<PrivateRoute><Invoice /></PrivateRoute>} />
+            <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/"             element={<Navigate to="/rooms" replace />} />
           </Routes>
         </div>
